@@ -1,0 +1,20 @@
+# Copyright (c) 2025 Vsevolod Tsiliurik
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Install:
+# Follow README.md
+
+[Unit]
+Description=Rclone bisync for %i
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/etc/systemd/system/rclone-bisync.sh %i
+Environment="RCLONE_BISYNC_BASE=%h/Sync"
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
