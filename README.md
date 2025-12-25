@@ -32,4 +32,18 @@ systemctl --user enable --now rclone-bisync@MyRemote.path
 ```
 
 Watches `~/Sync/MyRemote/` (uses `%h/Sync/%i/` from systemd path unit).
-Override path by creating systemd override with custom `PathModified`/`PathChanged`.
+
+## Per-Remote Path Watcher Customization
+
+Create override files for custom paths:
+
+```bash
+mkdir -p ~/.config/systemd/user/rclone-bisync@MyRemote.path.d
+cat > ~/.config/systemd/user/rclone-bisync@MyRemote.path.d/override.conf <<EOF
+[Path]
+[Path]
+PathModified=MyCustomSyncRoot/%i/
+PathChanged=MyCustomSyncRoot/%i/
+EOF
+systemctl --user daemon-reload
+```
