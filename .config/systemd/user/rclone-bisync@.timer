@@ -8,9 +8,9 @@
 Description=Rclone bisync timer %i
 
 [Timer]
-OnBootSec=5min
-OnUnitActiveSec=20min
-RandomizedDelaySec=10min
+OnBootSec=2min
+OnUnitActiveSec=15min
+RandomizedDelaySec=5min
 Persistent=true
 
 [Install]

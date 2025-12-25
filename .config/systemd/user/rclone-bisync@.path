@@ -1,0 +1,17 @@
+# Copyright (c) 2025 Vsevolod Tsiliurik
+# SPDX-License-Identifier: AGPL-3.0-or-later
+
+# Install:
+# Follow README.md
+
+[Unit]
+Description=Rclone bisync path monitor %i
+After=rclone-bisync@%i.service
+
+[Path]
+PathModified=%h/Sync/%i/
+PathChanged=%h/Sync/%i/
+Unit=rclone-bisync@%i.service
+
+[Install]
+WantedBy=paths.target
