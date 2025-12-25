@@ -1,3 +1,15 @@
+# Usage
+
+1. Configure remotes in `rclone.conf`
+2. Edit `~/.config/rclone-bisync/config.conf` (set `SYNC_ROOT`)
+3. Enable timers:
+	+ `systemctl --user enable --now rclone-bisync@MyRemote.timer`
+4. Repeat per remote
+
+Supports symlinked local paths for multi-cloud identical state.
+
+---
+
 # Rclone Systemd Suite
 
 Offline-capable bidirectional sync with systemd automation.

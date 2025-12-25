@@ -5,16 +5,13 @@
 # Follow README.md
 
 [Unit]
-Description=Rclone bisync for %i
+Description=Rclone bisync %i
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=oneshot
-ExecStart=/etc/systemd/system/rclone-bisync.sh %i
-Environment="RCLONE_BISYNC_BASE=%h/Sync"
-StandardOutput=journal
-StandardError=journal
+ExecStart=%h/.local/bin/rclone-bisync.sh %i
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

@@ -1,0 +1,25 @@
+[Desktop Entry]
+Type=Application
+Name=Rclone Web GUI
+GenericName=Cloud Storage Manager
+Comment=Manage cloud storage via Rclone web interface
+Icon=rclone
+Exec=bash -c 'source ~/.config/rclone-rcd-gui/.config; systemctl --user is-active --quiet rclone-rcd-gui.service || systemctl --user start rclone-rcd-gui.service; sleep 1; xdg-open http://${RC_ADDR}:${RC_PORT}'
+Terminal=false
+Categories=Network;FileTransfer;System;
+Keywords=cloud;storage;sync;backup;
+
+Actions=Stop;Restart;EditConfig;
+
+[Desktop Action Stop]
+Name=Stop Service
+Exec=systemctl --user stop rclone-rcd-gui.service
+
+[Desktop Action Restart]
+Name=Restart Service
+Exec=systemctl --user restart rclone-rcd-gui.service
+
+[Desktop Action EditConfig]
+Name=Edit Configuration
+Exec=xdg-open ~/.config/rclone-rcd-gui/.config
+
