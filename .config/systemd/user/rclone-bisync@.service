@@ -5,13 +5,32 @@
 # Follow README.md
 
 [Unit]
-Description=Rclone bisync %i
+Description=Rclone bisync: remote "%i"
 After=network-online.target
 Wants=network-online.target
 
 [Service]
+
+# Built-in defaults (fallbacks if external configs don't override)
+Environment=SYNC_ROOT=%h/Sync
+Environment=LOCK_TIMEOUT=1800
+Environment=BISYNC_FLAGS=
+
+# Systemd-managed paths
+Environment=CACHE_DIR=%S/%p/%i
+Environment=LOCK_FILE=%t/%p-%i.lock
+
+# External user/system configurations
+EnvironmentFile=%E/%p/.config
+EnvironmentFile=%h/.config/%p/.config
+EnvironmentFile=%E/%p/%i.config
+EnvironmentFile=%h/.config/%p/%i.config
+
 Type=oneshot
-ExecStart=%h/.local/bin/rclone-bisync.sh %i
+# TODO: same as below
+# FIXME: should point to an installation method agnostic location of the executable. If it is in path - then calling it by name should be enough?
+# ExecStart=%h/.local/bin/%p.sh %i
+# ExecStart=%p.sh %i # works better???
 
 [Install]
 WantedBy=default.target

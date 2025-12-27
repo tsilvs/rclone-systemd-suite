@@ -20,3 +20,4 @@ rclone bisync "$LOCAL_PATH" "$REMOTE:" \
 	--conflict-loser num \
 	--create-empty-src-dirs \
 	$BISYNC_FLAGS
+

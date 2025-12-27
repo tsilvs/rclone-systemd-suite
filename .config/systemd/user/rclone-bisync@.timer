@@ -5,7 +5,7 @@
 # Follow README.md
 
 [Unit]
-Description=Rclone bisync timer %i
+Description=Rclone bisync timer: Remote "%i"
 
 [Timer]
 OnBootSec=2min

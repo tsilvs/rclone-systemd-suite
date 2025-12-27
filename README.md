@@ -1,15 +1,31 @@
 # Rclone Systemd Suite
 
-Bidirectional sync with systemd automation.
+A few configs for efficient and convenient RClone management.
+
+## Features
+
++ Rclone RCD Web GUI to IDE integration
++ Bidirectional sync with systemd automation.
 
 ## Quick Start
 
 ```bash
 ./install.sh
+# Enable Sync on Timer
 systemctl --user enable --now rclone-bisync@MyRemote.timer
+# Enable Sync on Path Watch
+systemctl --user enable --now rclone-bisync@MyRemote.path
 ```
 
-## Per-Remote Timer Customization
+## Configuration
+
+Configuration files follow systemd's standard precedence:
+- System-wide: `/etc/rclone-bisync/` and `/etc/rclone-rcd-gui/`
+- User-specific: `~/.config/rclone-bisync/` and `~/.config/rclone-rcd-gui/`
+
+Built-in defaults are provided by the systemd units and can be overridden by creating configuration files in the directories above.
+
+## Custom Timer
 
 Create override files for custom intervals:
 
@@ -23,17 +39,7 @@ EOF
 systemctl --user daemon-reload
 ```
 
-## Event-Driven Sync
-
-Enable path monitoring for immediate sync:
-
-```bash
-systemctl --user enable --now rclone-bisync@MyRemote.path
-```
-
-Watches `~/Sync/MyRemote/` (uses `%h/Sync/%i/` from systemd path unit).
-
-## Per-Remote Path Watcher Customization
+## Custom Path Watcher
 
 Create override files for custom paths:
 
@@ -41,9 +47,10 @@ Create override files for custom paths:
 mkdir -p ~/.config/systemd/user/rclone-bisync@MyRemote.path.d
 cat > ~/.config/systemd/user/rclone-bisync@MyRemote.path.d/override.conf <<EOF
 [Path]
-[Path]
-PathModified=MyCustomSyncRoot/%i/
-PathChanged=MyCustomSyncRoot/%i/
+# Note: Paths are relative to SYNC_ROOT (default: ~/Sync)
+# Set SYNC_ROOT in ~/.config/rclone-bisync/@MyRemote.config if needed
+PathModified=%i/
+PathChanged=%i/
 EOF
 systemctl --user daemon-reload
 ```

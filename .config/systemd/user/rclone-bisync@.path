@@ -5,13 +5,16 @@
 # Follow README.md
 
 [Unit]
-Description=Rclone bisync path monitor %i
+Description=Rclone bisync path monitor: remote "%i"
 After=rclone-bisync@%i.service
 
 [Path]
-PathModified=%h/Sync/%i/
-PathChanged=%h/Sync/%i/
-Unit=rclone-bisync@%i.service
+# Use environment variable for sync root (set in service unit)
+# TODO: Same as
+# FIXME: In overrides, these will pointing to other monitored paths. Ensure it works correctly.
+PathModified=%h/.%p/%i/
+PathChanged=%h/.%p/%i/
+Unit=%p@%i.service
 
 [Install]
 WantedBy=paths.target

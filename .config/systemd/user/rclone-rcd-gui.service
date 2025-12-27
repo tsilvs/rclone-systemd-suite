@@ -12,13 +12,26 @@
 
 [Unit]
 Description=Rclone RC Web GUI
-Documentation=https://rclone.org/rc/
+Documentation=https://rclone.org/gui/
 After=network-online.target
 Wants=network-online.target
 
 [Service]
 Type=notify
-EnvironmentFile=%h/.config/rclone-rcd-gui/.config
+
+# Built-in defaults (fallbacks if external configs don't override)
+Environment=RC_PORT=5572
+Environment=RC_ADDR=127.0.0.1
+
+# Systemd-managed paths
+Environment=STATE_DIR=%S/%N
+Environment=RUNTIME_DIR=%t/%N
+
+# External user/system configurations
+# NOTE: Should always come after hardcode for correct value overwrite order.
+EnvironmentFile=%h/.config/%N/.config
+EnvironmentFile=%E/%N/.config
+
 ExecStart=/usr/bin/rclone rcd --rc-web-gui --rc-addr=${RC_ADDR}:${RC_PORT}
 Restart=on-failure
 RestartSec=5s
