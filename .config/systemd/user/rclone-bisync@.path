@@ -1,31 +1,20 @@
 # Copyright (c) 2025 Vsevolod Tsiliurik
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Install:
-# Follow README.md
-
-# To configure paths and timeouts, specify override at: %Y/%p@%i.path.d/override.conf
-# as:
-# PathModified=SomePath
-# PathChanged=SomePath
-# TriggerLimitIntervalSec=SomeInterval
-# TriggerLimitBurst=SomeBurstLimit
+# Rclone Bisync Path Watcher (template unit)
+# Triggers sync on local file changes
+# Override paths: ~/.config/systemd/user/rclone-bisync@MyRemote.path.d/override.conf
 
 [Unit]
 Description=%p path watcher: remote "%i"
 Conflicts=%p@%i.timer
 
 [Path]
-# Use environment variable for sync root (set in service unit)
 Unit=%p@%i.service
-# TODO: Same as below
-# FIXME: In overrides, these will pointing to other monitored paths. Ensure it works correctly.
 PathModified=%h/.%p/%i/
 PathChanged=%h/.%p/%i/
-# Debounce to avoid "incoming sync change trigger" loops
-# TODO: Explain what this does
+# Debounce: prevents rapid re-triggering from incoming sync changes
 TriggerLimitIntervalSec=30
-# TODO: Explain what this does
 TriggerLimitBurst=1
 
 [Install]

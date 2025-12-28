@@ -1,14 +1,8 @@
 # Copyright (c) 2025 Vsevolod Tsiliurik
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Install:
-# Follow README.md
-
-# RClone management built-in Web GUI
-# rclone rcd --rc-web-gui
-# Official docs: https://rclone.org/gui/
-
-# Run as rclone-rcd-gui.service
+# RClone RC Web GUI service
+# Docs: https://rclone.org/gui/
 
 [Unit]
 Description=Rclone RC Web GUI
@@ -19,7 +13,7 @@ Wants=network-online.target
 [Service]
 Type=notify
 
-# Built-in defaults (fallbacks if external configs don't override)
+# Built-in defaults
 Environment=RC_PORT=5572
 Environment=RC_ADDR=127.0.0.1
 
@@ -27,17 +21,16 @@ Environment=RC_ADDR=127.0.0.1
 Environment=STATE_DIR=%S/%N
 Environment=RUNTIME_DIR=%t/%N
 
-# External user/system configurations
-# NOTE: Should always come after hardcode for correct value overwrite order.
-EnvironmentFile=-%E/%N/.config
-EnvironmentFile=-%h/.config/%N/.config
+# Config: system -> user
+EnvironmentFile=-%E/%N/conf.env
+EnvironmentFile=-%h/.config/%N/conf.env
 
 ExecStart=/usr/bin/rclone rcd --rc-web-gui --rc-addr=${RC_ADDR}:${RC_PORT}
 Restart=on-failure
 RestartSec=5s
 TimeoutStopSec=10s
 
-# Security
+# Security hardening
 PrivateTmp=yes
 NoNewPrivileges=yes
 ProtectSystem=strict

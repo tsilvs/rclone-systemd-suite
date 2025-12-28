@@ -1,37 +1,45 @@
 # Rclone Systemd Suite
 
-A few configs for efficient and convenient RClone management.
+Systemd units for RClone bidirectional sync + RCD Web GUI.
 
-## Features
-
-+ Rclone RCD Web GUI to IDE integration
-+ Bidirectional sync with systemd automation.
-
-## Quick Start
+## Install
 
 ```bash
+# User (default)
 ./install.sh
-# Enable Sync on Timer
 systemctl --user enable --now rclone-bisync@MyRemote.timer
-# Enable Sync on Path Watch
+
+# System-wide (root, e.g. for config backups)
+sudo ./install.sh --system
+sudo systemctl enable --now rclone-bisync@MyRemote.timer
+```
+
+## Triggers
+
+Timer (periodic) + path watcher (on-change) conflict by design - use one:
+
+```bash
+# Timer-based (default: 15min intervals)
+systemctl --user enable --now rclone-bisync@MyRemote.timer
+
+# Path-based (on local file changes)
 systemctl --user enable --now rclone-bisync@MyRemote.path
 ```
 
-## Configuration
+## Config
 
-Configuration files follow systemd's standard precedence:
-- System-wide: `/etc/rclone-bisync/` and `/etc/rclone-rcd-gui/`
-- User-specific: `~/.config/rclone-bisync/` and `~/.config/rclone-rcd-gui/`
+Precedence (later overrides earlier):
+1. Built-in defaults in unit files
+2. System: `/etc/rclone-bisync/.config`, `/etc/rclone-bisync/MyRemote.config`
+3. User: `~/.config/rclone-bisync/.config`, `~/.config/rclone-bisync/MyRemote.config`
 
-Built-in defaults are provided by the systemd units and can be overridden by creating configuration files in the directories above.
+Variables: `SYNC_ROOT`, `BISYNC_FLAGS`, `CHECK_FILE`, `LOCAL_PATH`, `CACHE_DIR`
 
 ## Custom Timer
 
-Create override files for custom intervals:
-
 ```bash
 mkdir -p ~/.config/systemd/user/rclone-bisync@MyRemote.timer.d
-cat > ~/.config/systemd/user/rclone-bisync@MyRemote.timer.d/override.conf <<EOF
+cat > ~/.config/systemd/user/rclone-bisync@MyRemote.timer.d/override.conf <<'EOF'
 [Timer]
 OnBootSec=10min
 OnUnitActiveSec=30min
@@ -41,16 +49,25 @@ systemctl --user daemon-reload
 
 ## Custom Path Watcher
 
-Create override files for custom paths:
-
 ```bash
 mkdir -p ~/.config/systemd/user/rclone-bisync@MyRemote.path.d
-cat > ~/.config/systemd/user/rclone-bisync@MyRemote.path.d/override.conf <<EOF
+cat > ~/.config/systemd/user/rclone-bisync@MyRemote.path.d/override.conf <<'EOF'
 [Path]
-# Note: Paths are relative to SYNC_ROOT (default: ~/.rclone-bisync)
-# Set SYNC_ROOT in ~/.config/rclone-bisync/@MyRemote.config if needed
-PathModified=%i/
-PathChanged=%i/
+PathModified=/custom/path/
+PathChanged=/custom/path/
 EOF
 systemctl --user daemon-reload
 ```
+
+## System-Wide Usage
+
+For system config backups or shared sync (e.g. `/etc` backup to cloud):
+
+```bash
+sudo ./install.sh --system
+# Configure remote-specific settings
+sudo editor /etc/rclone-bisync/MyRemote.config
+sudo systemctl enable --now rclone-bisync@MyRemote.timer
+```
+
+Note: System units run as root. Configure `LOCAL_PATH` appropriately.

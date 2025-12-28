@@ -1,8 +1,9 @@
 # Copyright (c) 2025 Vsevolod Tsiliurik
 # SPDX-License-Identifier: AGPL-3.0-or-later
 
-# Install:
-# Follow README.md
+# Rclone Bisync Service (template unit)
+# Usage: systemctl [--user] enable --now rclone-bisync@MyRemote.timer
+# %i = remote name (e.g., MyRemote)
 
 [Unit]
 Description=%p: remote "%i"
@@ -11,40 +12,30 @@ Wants=network-online.target
 
 [Service]
 
-# Built-in defaults (fallbacks if external configs don't override)
-# Environment=SYNC_ROOT=%h/.%p
-# Environment=BISYNC_FLAGS=
+# Built-in defaults
 Environment=CHECK_FILE=RCLONE_TEST
 
-# Systemd-managed paths
-# RClone Remote identifier
+# Systemd-managed paths (%i = instance name, %h = home, %C = cache, %E = /etc or ~/.config)
 Environment=REMOTE=%i:
-# Caches if directory was initialized for bisync
 Environment=CACHE_DIR=%C/%p/%i
-# Path storing remote files locally
 Environment=LOCAL_PATH=%h/.%p/%i
 
-# External user/system configurations
-EnvironmentFile=-%E/%p/.config
-EnvironmentFile=-%h/.config/%p/.config
-EnvironmentFile=-%E/%p/%i.config
-EnvironmentFile=-%h/.config/%p/%i.config
+# Config precedence: system global -> user global -> system per-remote -> user per-remote
+EnvironmentFile=-%E/%p/conf.env
+EnvironmentFile=-%h/.config/%p/conf.env
+EnvironmentFile=-%E/%p/%iconf.env
+EnvironmentFile=-%h/.config/%p/%iconf.env
 
 Type=oneshot
-# Checks health: tests for `rclone` and for connectabiltiy of the remote
-# TODO: Better check logging for better maintain & debug?
+
+# Health check: rclone installed + remote accessible
 ExecCondition=command -v rclone >/dev/null && \
 	command -v logger >/dev/null && \
 	rclone lsd "$REMOTE" >/dev/null 2>&1
-# `flock` is not needed. RClone Bisync locks paths by itself.
-# ExecStartPre=/bin/bash -c ''
-# Checks for rclone bisync init cache markers.
-# If not present - prepares for initial bisync
-# If present - runs routine bisync
-# TODO: Do I need to check for unreleased rclone bisync locks?
-# Execute bisync. Locking is built-in.
+
+# Bisync logic: init on first run, then routine sync with conflict handling
 ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
-		echo "bisync-test-\$(date +%s)" > "$LOCAL_PATH/$CHECK_FILE" && \
+		echo "bisync-test-$(date +%%s)" > "$LOCAL_PATH/$CHECK_FILE" && \
 		mkdir -p "$LOCAL_PATH" "$CACHE_DIR" && \
 		rclone copy "$LOCAL_PATH/$CHECK_FILE" "$REMOTE" --create-empty-src-dirs && \
 		rclone bisync "$LOCAL_PATH" "$REMOTE" --resync --create-empty-src-dirs && \
@@ -60,10 +51,9 @@ ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
 			--conflict-loser num \
 			--create-empty-src-dirs \
 			${BISYNC_FLAGS:+"$BISYNC_FLAGS"}; \
-	fi"'
-# Log successful completion (lock automatically released when rclone bisync exits)
+	fi'
+
 ExecStartPost=logger -t "%N" "Sync completed successfully"
 
 [Install]
 WantedBy=default.target
-
