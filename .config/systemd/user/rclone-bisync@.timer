@@ -5,7 +5,8 @@
 # Follow README.md
 
 [Unit]
-Description=Rclone bisync timer: Remote "%i"
+Description=%p timer: Remote "%i"
+Conflicts=%p@%i.path
 
 [Timer]
 OnBootSec=2min

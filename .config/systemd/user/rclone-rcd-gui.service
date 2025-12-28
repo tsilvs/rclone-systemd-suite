@@ -29,8 +29,8 @@ Environment=RUNTIME_DIR=%t/%N
 
 # External user/system configurations
 # NOTE: Should always come after hardcode for correct value overwrite order.
-EnvironmentFile=%h/.config/%N/.config
-EnvironmentFile=%E/%N/.config
+EnvironmentFile=-%E/%N/.config
+EnvironmentFile=-%h/.config/%N/.config
 
 ExecStart=/usr/bin/rclone rcd --rc-web-gui --rc-addr=${RC_ADDR}:${RC_PORT}
 Restart=on-failure
@@ -41,7 +41,7 @@ TimeoutStopSec=10s
 PrivateTmp=yes
 NoNewPrivileges=yes
 ProtectSystem=strict
-ProtectHome=read-only
+ProtectHome=no
 
 [Install]
 WantedBy=default.target

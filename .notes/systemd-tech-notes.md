@@ -42,8 +42,8 @@
 | Instance | `%i`      | +   | Instance name                    | String between first `@` and unit type suffix. Empty for non-instantiated units.                              |
 | instance | `%I`      | +   | Unescaped instance name          | Same as `%i`, unescaped.                                                                                      |
 | Runtime  | `%t`      | +   | Runtime directory root           | `/run` (system) or `$XDG_RUNTIME_DIR` (user).                                                                 |
-| fragment | `%Y`      | ?   | Unit fragment directory          | Directory of `%y`.                                                                                            |
 | fragment | `%y`      | ?   | Unit fragment path               | Path to main unit file. For symlinks, uses real path. Fails if no fragment exists.                            |
+| fragment | `%Y`      | ?   | Unit fragment directory          | Directory of `%y`.                                                                                            |
 
 ## File system paths
 

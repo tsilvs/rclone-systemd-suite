@@ -4,17 +4,29 @@
 # Install:
 # Follow README.md
 
+# To configure paths and timeouts, specify override at: %Y/%p@%i.path.d/override.conf
+# as:
+# PathModified=SomePath
+# PathChanged=SomePath
+# TriggerLimitIntervalSec=SomeInterval
+# TriggerLimitBurst=SomeBurstLimit
+
 [Unit]
-Description=Rclone bisync path monitor: remote "%i"
-After=rclone-bisync@%i.service
+Description=%p path watcher: remote "%i"
+Conflicts=%p@%i.timer
 
 [Path]
 # Use environment variable for sync root (set in service unit)
-# TODO: Same as
+Unit=%p@%i.service
+# TODO: Same as below
 # FIXME: In overrides, these will pointing to other monitored paths. Ensure it works correctly.
 PathModified=%h/.%p/%i/
 PathChanged=%h/.%p/%i/
-Unit=%p@%i.service
+# Debounce to avoid "incoming sync change trigger" loops
+# TODO: Explain what this does
+TriggerLimitIntervalSec=30
+# TODO: Explain what this does
+TriggerLimitBurst=1
 
 [Install]
 WantedBy=paths.target
