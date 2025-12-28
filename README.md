@@ -47,7 +47,7 @@ Create override files for custom paths:
 mkdir -p ~/.config/systemd/user/rclone-bisync@MyRemote.path.d
 cat > ~/.config/systemd/user/rclone-bisync@MyRemote.path.d/override.conf <<EOF
 [Path]
-# Note: Paths are relative to SYNC_ROOT (default: ~/Sync)
+# Note: Paths are relative to SYNC_ROOT (default: ~/.rclone-bisync)
 # Set SYNC_ROOT in ~/.config/rclone-bisync/@MyRemote.config if needed
 PathModified=%i/
 PathChanged=%i/

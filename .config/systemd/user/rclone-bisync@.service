@@ -12,25 +12,58 @@ Wants=network-online.target
 [Service]
 
 # Built-in defaults (fallbacks if external configs don't override)
-Environment=SYNC_ROOT=%h/Sync
-Environment=LOCK_TIMEOUT=1800
-Environment=BISYNC_FLAGS=
+# Environment=SYNC_ROOT=%h/.%p
+# Environment=BISYNC_FLAGS=
+Environment=CHECK_FILE=RCLONE_TEST
 
 # Systemd-managed paths
-Environment=CACHE_DIR=%S/%p/%i
-Environment=LOCK_FILE=%t/%p-%i.lock
+# RClone Remote identifier
+Environment=REMOTE=%i:
+# Caches if directory was initialized for bisync
+Environment=CACHE_DIR=%C/%p/%i
+# Path storing remote files locally
+Environment=LOCAL_PATH=%h/.%p/%i
 
 # External user/system configurations
-EnvironmentFile=%E/%p/.config
-EnvironmentFile=%h/.config/%p/.config
-EnvironmentFile=%E/%p/%i.config
-EnvironmentFile=%h/.config/%p/%i.config
+EnvironmentFile=-%E/%p/.config
+EnvironmentFile=-%h/.config/%p/.config
+EnvironmentFile=-%E/%p/%i.config
+EnvironmentFile=-%h/.config/%p/%i.config
 
 Type=oneshot
-# TODO: same as below
-# FIXME: should point to an installation method agnostic location of the executable. If it is in path - then calling it by name should be enough?
-# ExecStart=%h/.local/bin/%p.sh %i
-# ExecStart=%p.sh %i # works better???
+# Checks health: tests for `rclone` and for connectabiltiy of the remote
+# TODO: Better check logging for better maintain & debug?
+ExecCondition=command -v rclone >/dev/null && \
+	command -v logger >/dev/null && \
+	rclone lsd "$REMOTE" >/dev/null 2>&1
+# `flock` is not needed. RClone Bisync locks paths by itself.
+# ExecStartPre=/bin/bash -c ''
+# Checks for rclone bisync init cache markers.
+# If not present - prepares for initial bisync
+# If present - runs routine bisync
+# TODO: Do I need to check for unreleased rclone bisync locks?
+# Execute bisync. Locking is built-in.
+ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
+		echo "bisync-test-\$(date +%s)" > "$LOCAL_PATH/$CHECK_FILE" && \
+		mkdir -p "$LOCAL_PATH" "$CACHE_DIR" && \
+		rclone copy "$LOCAL_PATH/$CHECK_FILE" "$REMOTE" --create-empty-src-dirs && \
+		rclone bisync "$LOCAL_PATH" "$REMOTE" --resync --create-empty-src-dirs && \
+		touch "$CACHE_DIR/.initialized"; \
+	else \
+		rclone bisync "$LOCAL_PATH" "$REMOTE" \
+			--check-access \
+			--check-filename "$CHECK_FILE" \
+			--track-renames \
+			--resilient \
+			--recover \
+			--conflict-resolve newer \
+			--conflict-loser num \
+			--create-empty-src-dirs \
+			${BISYNC_FLAGS:+"$BISYNC_FLAGS"}; \
+	fi"'
+# Log successful completion (lock automatically released when rclone bisync exits)
+ExecStartPost=logger -t "%N" "Sync completed successfully"
 
 [Install]
 WantedBy=default.target
+
