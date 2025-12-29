@@ -7,7 +7,17 @@
 
 set -e
 
-if [ "$1" = "--system" ]; then
+DRY_RUN=""
+SYSTEM=""
+
+for arg in "$@"; do
+	case "$arg" in
+		--system) SYSTEM=1 ;;
+		--dry-run) DRY_RUN=1 ;;
+	esac
+done
+
+if [ "$SYSTEM" ]; then
 	CONF_DIR="/etc"
 	SYSTEMD_DIR="/etc/systemd/system"
 	SYSTEMCTL_OPT=""
@@ -26,11 +36,44 @@ fi
 RCLONE_BISYNC_CONFIG="$CONF_DIR/rclone-bisync/conf.env"
 RCLONE_RCDGUI_CONFIG="$CONF_DIR/rclone-rcd-gui/conf.env"
 
-$RUN mkdir -p "$CONF_DIR/rclone-bisync" "$CONF_DIR/rclone-rcd-gui" "$SYSTEMD_DIR" "$DESKTOP_DIR"
-$RUN cp .config/systemd/user/* "$SYSTEMD_DIR/"
-$RUN cp .local/share/applications/* "$DESKTOP_DIR/" 2>/dev/null || true
-[ ! -f "$RCLONE_BISYNC_CONFIG" ] && $RUN cp .config/rclone-bisync/.example.conf.env "$RCLONE_BISYNC_CONFIG"
-[ ! -f "$RCLONE_RCDGUI_CONFIG" ] && $RUN cp .config/rclone-rcd-gui/.example.conf.env "$RCLONE_RCDGUI_CONFIG"
-$RUN systemctl $SYSTEMCTL_OPT daemon-reload
+run() {
+	if [ "$DRY_RUN" ]; then
+		echo "[dry-run] $RUN $*"
+	else
+		$RUN "$@"
+	fi
+}
+
+if [ "$DRY_RUN" ]; then
+	echo "=== $SCOPE install (dry-run) ==="
+	echo "Config dir: $CONF_DIR"
+	echo "Systemd dir: $SYSTEMD_DIR"
+	echo "Desktop dir: $DESKTOP_DIR"
+	echo "systemctl option: ${SYSTEMCTL_OPT:-'(none)'}"
+	echo ""
+fi
+
+run mkdir -p "$CONF_DIR"/rclone-{bisync,rcd-gui} "$SYSTEMD_DIR" "$DESKTOP_DIR"
+run cp .config/systemd/user/* "$SYSTEMD_DIR/"
+
+# Generate .desktop from template
+if [ -f .local/share/applications/rclone-rcd-gui.tpl.desktop ]; then
+	sed -e "s|@CONFIG_PATH@|$RCLONE_RCDGUI_CONFIG|g" \
+			-e "s|@SYSTEMCTL_OPT@|$SYSTEMCTL_OPT|g" \
+			.local/share/applications/rclone-rcd-gui.tpl.desktop > /tmp/rclone-rcd-gui.desktop
+	if [ "$DRY_RUN" ]; then
+		echo "[dry-run] Generated .desktop content:"
+		cat /tmp/rclone-rcd-gui.desktop
+		echo ""
+		echo "[dry-run] $RUN install -m 644 /tmp/rclone-rcd-gui.desktop $DESKTOP_DIR/rclone-rcd-gui.desktop"
+	else
+		$RUN install -m 644 /tmp/rclone-rcd-gui.desktop "$DESKTOP_DIR/rclone-rcd-gui.desktop"
+	fi
+	rm -f /tmp/rclone-rcd-gui.desktop
+fi
+
+[ ! -f "$RCLONE_BISYNC_CONFIG" ] && run cp .config/rclone-bisync/.example.conf.env "$RCLONE_BISYNC_CONFIG"
+[ ! -f "$RCLONE_RCDGUI_CONFIG" ] && run cp .config/rclone-rcd-gui/.example.conf.env "$RCLONE_RCDGUI_CONFIG"
+run systemctl $SYSTEMCTL_OPT daemon-reload
 
 echo "$SCOPE install done. Enable: systemctl $SYSTEMCTL_OPT enable --now rclone-bisync@MyRemote.timer"

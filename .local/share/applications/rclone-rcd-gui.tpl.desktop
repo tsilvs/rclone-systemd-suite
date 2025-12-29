@@ -1,0 +1,93 @@
+[Desktop Entry]
+Type=Application
+Name=Rclone Web GUI
+Name[ru]=Rclone Веб-интерфейс
+Name[uk]=Rclone Веб-інтерфейс
+Name[sr]=Rclone Веб интерфејс
+Name[pl]=Rclone Interfejs WWW
+Name[de]=Rclone Web-Oberfläche
+Name[es]=Rclone Interfaz Web
+Name[fr]=Rclone Interface Web
+Name[pt]=Rclone Interface Web
+GenericName=Cloud Storage Manager
+GenericName[ru]=Менеджер облачных хранилищ
+GenericName[uk]=Менеджер хмарних сховищ
+GenericName[sr]=Менаџер складишта у облаку
+GenericName[pl]=Menedżer pamięci w chmurze
+GenericName[de]=Cloud-Speicher-Manager
+GenericName[es]=Gestor de almacenamiento en la nube
+GenericName[fr]=Gestionnaire de stockage cloud
+GenericName[pt]=Gerenciador de armazenamento em nuvem
+Comment=Manage cloud storage via Rclone web interface
+Comment[ru]=Управление облачным хранилищем через веб-интерфейс Rclone
+Comment[uk]=Керування хмарним сховищем через веб-інтерфейс Rclone
+Comment[sr]=Управљање складиштем у облаку преко Rclone веб интерфејса
+Comment[pl]=Zarządzanie pamięcią w chmurze przez interfejs WWW Rclone
+Comment[de]=Cloud-Speicher über Rclone-Weboberfläche verwalten
+Comment[es]=Administrar almacenamiento en la nube a través de la interfaz web de Rclone
+Comment[fr]=Gérer le stockage cloud via l'interface web Rclone
+Comment[pt]=Gerenciar armazenamento em nuvem via interface web do Rclone
+Icon=rclone
+Exec=bash -c 'source @CONFIG_PATH@; systemctl @SYSTEMCTL_OPT@ is-active --quiet rclone-rcd-gui.service || systemctl @SYSTEMCTL_OPT@ start rclone-rcd-gui.service; sleep 1; xdg-open http://${RC_ADDR}:${RC_PORT}'
+Terminal=false
+Categories=Network;FileTransfer;System;
+Keywords=cloud;storage;sync;backup;
+Keywords[ru]=облако;хранилище;синхронизация;резервное копирование;
+Keywords[uk]=хмара;сховище;синхронізація;резервне копіювання;
+Keywords[sr]=облак;складиште;синхронизација;резервна копија;
+Keywords[pl]=chmura;pamięć;synchronizacja;kopia zapasowa;
+Keywords[de]=Cloud;Speicher;Synchronisation;Sicherung;
+Keywords[es]=nube;almacenamiento;sincronización;copia de seguridad;
+Keywords[fr]=cloud;stockage;synchronisation;sauvegarde;
+Keywords[pt]=nuvem;armazenamento;sincronização;backup;
+
+Actions=Stop;Restart;EditConfig;OpenLogs;
+
+[Desktop Action Stop]
+Name=Stop Service
+Name[ru]=Остановить службу
+Name[uk]=Зупинити службу
+Name[sr]=Заустави сервис
+Name[pl]=Zatrzymaj usługę
+Name[de]=Dienst stoppen
+Name[es]=Detener servicio
+Name[fr]=Arrêter le service
+Name[pt]=Parar serviço
+Exec=systemctl @SYSTEMCTL_OPT@ stop rclone-rcd-gui.service
+
+[Desktop Action Restart]
+Name=Restart Service
+Name[ru]=Перезапустить службу
+Name[uk]=Перезапустити службу
+Name[sr]=Поново покрени сервис
+Name[pl]=Uruchom ponownie usługę
+Name[de]=Dienst neu starten
+Name[es]=Reiniciar servicio
+Name[fr]=Redémarrer le service
+Name[pt]=Reiniciar serviço
+Exec=systemctl @SYSTEMCTL_OPT@ restart rclone-rcd-gui.service
+
+[Desktop Action EditConfig]
+Name=Edit Configuration
+Name[ru]=Редактировать конфигурацию
+Name[uk]=Редагувати конфігурацію
+Name[sr]=Уреди конфигурацију
+Name[pl]=Edytuj konfigurację
+Name[de]=Konfiguration bearbeiten
+Name[es]=Editar configuración
+Name[fr]=Modifier la configuration
+Name[pt]=Editar configuração
+Exec=xdg-open @CONFIG_PATH@
+
+[Desktop Action OpenLogs]
+Name=Open Logs
+Name[ru]=Открыть журналы
+Name[uk]=Відкрити журнали
+Name[sr]=Отвори дневнике
+Name[pl]=Otwórz dzienniki
+Name[de]=Protokolle öffnen
+Name[es]=Abrir registros
+Name[fr]=Ouvrir les journaux
+Name[pt]=Abrir logs
+Exec=bash -c 'journalctl @SYSTEMCTL_OPT@ -u rclone-rcd-gui.service --no-pager | ${PAGER:-less}'
+Terminal=true
