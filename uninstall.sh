@@ -7,15 +7,29 @@
 
 set -e
 
+usage() {
+	cat <<-EOF
+	Usage: $(basename "$0") [OPTIONS]
+
+	Options:
+		-s, --system    Uninstall system-wide (requires sudo)
+		-n, --dry-run   Show commands without executing
+		-p, --purge     Also remove configuration files
+		-h, --help      Show this help
+	EOF
+	exit 0
+}
+
 DRY_RUN=""
 SYSTEM=""
 PURGE=""
 
 for arg in "$@"; do
 	case "$arg" in
-		--system) SYSTEM=1 ;;
-		--dry-run) DRY_RUN=1 ;;
-		--purge) PURGE=1 ;;
+		-s|--system) SYSTEM=1 ;;
+		-n|--dry-run) DRY_RUN=1 ;;
+		-p|--purge) PURGE=1 ;;
+		-h|--help) usage ;;
 	esac
 done
 
@@ -78,4 +92,6 @@ fi
 
 run systemctl $SYSTEMCTL_OPT daemon-reload
 
-echo "$SCOPE uninstall done.${PURGE:+ Configs purged.}"
+if [ -z "$DRY_RUN" ]; then
+	echo "$SCOPE uninstall done.${PURGE:+ Configs purged.}"
+fi

@@ -16,6 +16,9 @@ Type=notify
 # Built-in defaults
 Environment=RC_PORT=5572
 Environment=RC_ADDR=127.0.0.1
+Environment=RC_USER=
+Environment=RC_PASS=
+Environment=RC_NO_AUTH=
 
 # Systemd-managed paths
 Environment=STATE_DIR=%S/%N
@@ -25,7 +28,12 @@ Environment=RUNTIME_DIR=%t/%N
 EnvironmentFile=-%E/%N/conf.env
 EnvironmentFile=-%h/.config/%N/conf.env
 
-ExecStart=/usr/bin/rclone rcd --rc-web-gui --rc-addr=${RC_ADDR}:${RC_PORT}
+ExecStart=/bin/sh -c '\
+	exec /usr/bin/rclone rcd --rc-web-gui --rc-addr=${RC_ADDR}:${RC_PORT} \
+	${RC_NO_AUTH:+--rc-no-auth} \
+	${RC_USER:+--rc-user=${RC_USER}} \
+	${RC_PASS:+--rc-pass=${RC_PASS}} \
+'
 Restart=on-failure
 RestartSec=5s
 TimeoutStopSec=10s

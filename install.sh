@@ -7,13 +7,29 @@
 
 set -e
 
+usage() {
+	cat <<-EOF
+	Usage: $(basename "$0") [OPTIONS]
+
+	Options:
+		-s, --system              Install system-wide (requires sudo)
+		-n, --dry-run             Show commands without executing
+		-N, --dry-run-show-files  Like --dry-run + show generated file contents
+		-h, --help                Show this help
+	EOF
+	exit 0
+}
+
 DRY_RUN=""
+DRY_RUN_SHOW_FILES=""
 SYSTEM=""
 
 for arg in "$@"; do
 	case "$arg" in
-		--system) SYSTEM=1 ;;
-		--dry-run) DRY_RUN=1 ;;
+		-s|--system) SYSTEM=1 ;;
+		-n|--dry-run) DRY_RUN=1 ;;
+		-N|--dry-run-show-files) DRY_RUN=1; DRY_RUN_SHOW_FILES=1 ;;
+		-h|--help) usage ;;
 	esac
 done
 
@@ -62,9 +78,11 @@ if [ -f .local/share/applications/rclone-rcd-gui.tpl.desktop ]; then
 			-e "s| @SYSTEMCTL_OPT@|${SYSTEMCTL_OPT:+ $SYSTEMCTL_OPT}|g" \
 			.local/share/applications/rclone-rcd-gui.tpl.desktop > /tmp/rclone-rcd-gui.desktop
 	if [ "$DRY_RUN" ]; then
-		echo "[dry-run] Generated .desktop content:"
-		cat /tmp/rclone-rcd-gui.desktop
-		echo ""
+		if [ "$DRY_RUN_SHOW_FILES" ]; then
+			echo "[dry-run] Generated .desktop content:"
+			cat /tmp/rclone-rcd-gui.desktop
+			echo ""
+		fi
 		echo "[dry-run] $RUN install -m 644 /tmp/rclone-rcd-gui.desktop $DESKTOP_DIR/rclone-rcd-gui.desktop"
 	else
 		$RUN install -m 644 /tmp/rclone-rcd-gui.desktop "$DESKTOP_DIR/rclone-rcd-gui.desktop"
@@ -76,4 +94,7 @@ fi
 [ ! -f "$RCLONE_RCDGUI_CONFIG" ] && run cp .config/rclone-rcd-gui/.example.conf.env "$RCLONE_RCDGUI_CONFIG"
 run systemctl $SYSTEMCTL_OPT daemon-reload
 
-echo "$SCOPE install done. Enable: systemctl $SYSTEMCTL_OPT enable --now rclone-bisync@MyRemote.timer"
+if [ -z "$DRY_RUN" ]; then
+	echo "$SCOPE install done. Enable: systemctl $SYSTEMCTL_OPT enable --now rclone-bisync@MyRemote.timer"
+fi
+
