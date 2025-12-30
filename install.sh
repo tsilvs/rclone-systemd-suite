@@ -59,7 +59,7 @@ run cp .config/systemd/user/* "$SYSTEMD_DIR/"
 # Generate .desktop from template
 if [ -f .local/share/applications/rclone-rcd-gui.tpl.desktop ]; then
 	sed -e "s|@CONFIG_PATH@|$RCLONE_RCDGUI_CONFIG|g" \
-			-e "s|@SYSTEMCTL_OPT@|$SYSTEMCTL_OPT|g" \
+			-e "s| @SYSTEMCTL_OPT@|${SYSTEMCTL_OPT:+ $SYSTEMCTL_OPT}|g" \
 			.local/share/applications/rclone-rcd-gui.tpl.desktop > /tmp/rclone-rcd-gui.desktop
 	if [ "$DRY_RUN" ]; then
 		echo "[dry-run] Generated .desktop content:"
