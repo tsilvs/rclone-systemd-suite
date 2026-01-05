@@ -1,0 +1,97 @@
+# Desktop entry template.
+# Fill in empty entries.
+# Replace `@PALCEHOLDER@`'s.
+
+[Desktop Entry]
+Type=Application
+Name=
+Name[ru]=
+Name[uk]=
+Name[sr]=
+Name[pl]=
+Name[de]=
+Name[es]=
+Name[fr]=
+Name[pt]=
+GenericName=
+GenericName[ru]=
+GenericName[uk]=
+GenericName[sr]=
+GenericName[pl]=
+GenericName[de]=
+GenericName[es]=
+GenericName[fr]=
+GenericName[pt]=
+Comment=
+Comment[ru]=
+Comment[uk]=
+Comment[sr]=
+Comment[pl]=
+Comment[de]=
+Comment[es]=
+Comment[fr]=
+Comment[pt]=
+Icon=
+Exec=bash -c 'source @CONFIG_PATH@; systemctl @SYSTEMCTL_OPT@ is-active --quiet @SERVICE_ID@.service || systemctl @SYSTEMCTL_OPT@ start @SERVICE_ID@.service; sleep 1; xdg-open "http://${RC_ADDR}:${RC_PORT}"'
+Terminal=false
+Categories=
+Keywords=
+Keywords[ru]=
+Keywords[uk]=
+Keywords[sr]=
+Keywords[pl]=
+Keywords[de]=
+Keywords[es]=
+Keywords[fr]=
+Keywords[pt]=
+
+Actions=Stop;Restart;EditConfig;OpenLogs;
+
+[Desktop Action Stop]
+Name=
+Name[ru]=
+Name[uk]=
+Name[sr]=
+Name[pl]=
+Name[de]=
+Name[es]=
+Name[fr]=
+Name[pt]=
+Exec=systemctl @SYSTEMCTL_OPT@ stop @SERVICE_ID@.service
+
+[Desktop Action Restart]
+Name=
+Name[ru]=
+Name[uk]=
+Name[sr]=
+Name[pl]=
+Name[de]=
+Name[es]=
+Name[fr]=
+Name[pt]=
+Exec=systemctl @SYSTEMCTL_OPT@ restart @SERVICE_ID@.service
+
+[Desktop Action EditConfig]
+Name=
+Name[ru]=
+Name[uk]=
+Name[sr]=
+Name[pl]=
+Name[de]=
+Name[es]=
+Name[fr]=
+Name[pt]=
+Exec=xdg-open @CONFIG_PATH@
+
+[Desktop Action OpenLogs]
+Name=
+Name[ru]=
+Name[uk]=
+Name[sr]=
+Name[pl]=
+Name[de]=
+Name[es]=
+Name[fr]=
+Name[pt]=
+Exec=bash -c 'journalctl @SYSTEMCTL_OPT@ -u @SERVICE_ID@.service --no-pager | ${PAGER:-less}'
+Terminal=true
