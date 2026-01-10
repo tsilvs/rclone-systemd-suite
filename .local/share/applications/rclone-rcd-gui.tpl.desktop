@@ -41,7 +41,7 @@ Keywords[es]=nube;almacenamiento;sincronización;copia de seguridad;
 Keywords[fr]=cloud;stockage;synchronisation;sauvegarde;
 Keywords[pt]=nuvem;armazenamento;sincronização;backup;
 
-Actions=Start;Stop;Restart;EditConfig;OpenLogs;
+Actions=Start;Restart;Stop;Open;EditConfig;OpenLogs;
 
 [Desktop Action Start]
 Name=Start Service
@@ -55,18 +55,6 @@ Name[es]=Iniciar servicio
 Name[pt]=Iniciar serviço
 Exec=bash -c 'source @CONFIG_PATH@; systemctl @SYSTEMCTL_OPT@ is-active --quiet rclone-rcd-gui.service || systemctl @SYSTEMCTL_OPT@ start rclone-rcd-gui.service'
 
-[Desktop Action Stop]
-Name=Stop Service
-Name[ru]=Остановить службу
-Name[uk]=Зупинити службу
-Name[sr]=Заустави сервис
-Name[pl]=Zatrzymaj usługę
-Name[de]=Dienst stoppen
-Name[es]=Detener servicio
-Name[fr]=Arrêter le service
-Name[pt]=Parar serviço
-Exec=systemctl @SYSTEMCTL_OPT@ stop rclone-rcd-gui.service
-
 [Desktop Action Restart]
 Name=Restart Service
 Name[ru]=Перезапустить службу
@@ -77,7 +65,23 @@ Name[de]=Dienst neu starten
 Name[es]=Reiniciar servicio
 Name[fr]=Redémarrer le service
 Name[pt]=Reiniciar serviço
-Exec=systemctl @SYSTEMCTL_OPT@ restart rclone-rcd-gui.service
+Exec=systemctl --user restart rclone-rcd-gui.service
+
+[Desktop Action Stop]
+Name=Stop Service
+Name[ru]=Остановить службу
+Name[uk]=Зупинити службу
+Name[sr]=Заустави сервис
+Name[pl]=Zatrzymaj usługę
+Name[de]=Dienst stoppen
+Name[es]=Detener servicio
+Name[fr]=Arrêter le service
+Name[pt]=Parar serviço
+Exec=systemctl --user stop rclone-rcd-gui.service
+
+[Desktop Action Open]
+Name=Open Web
+Exec=xdg-open "http://${RC_ADDR}:${RC_PORT}"
 
 [Desktop Action EditConfig]
 Name=Edit Configuration

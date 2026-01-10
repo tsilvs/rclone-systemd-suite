@@ -11,34 +11,41 @@ After=network-online.target
 Wants=network-online.target
 
 [Service]
-Type=notify
+Type=simple
+# RuntimeDirectory=%N
 
-# Built-in defaults
-Environment=RC_PORT=5572
 Environment=RC_ADDR=127.0.0.1
-Environment=RC_USER=
-Environment=RC_PASS=
-Environment=RC_NO_AUTH=
+Environment=RC_PORT=5572
+# Default credentials, change in config file later
+Environment=RC_FLAGS=--rc-user=admin --rc-pass=admin
 
 # Systemd-managed paths
 Environment=STATE_DIR=%S/%N
 Environment=RUNTIME_DIR=%t/%N
 
 # Config: system -> user
+
+# Optional config files
 EnvironmentFile=-%E/%N/conf.env
 EnvironmentFile=-%h/.config/%N/conf.env
 
-ExecStart=/bin/sh -c '\
-	exec /usr/bin/rclone rcd --rc-web-gui --rc-addr=${RC_ADDR}:${RC_PORT} \
-	${RC_NO_AUTH:+--rc-no-auth} \
-	${RC_USER:+--rc-user=${RC_USER}} \
-	${RC_PASS:+--rc-pass=${RC_PASS}} \
-'
+# ExecStart=/usr/bin/rclone rcd --rc-web-gui --rc-addr=$RC_ADDR:$RC_PORT $RC_FLAGS
+
+ExecStart=/bin/sh -c "\
+	exec /usr/bin/rclone rcd \
+		--rc-web-gui \
+		--rc-addr=$RC_ADDR:$RC_PORT \
+		$RC_FLAGS"
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+
 Restart=on-failure
 RestartSec=5s
 TimeoutStopSec=10s
 
-# Security hardening
+# Security
 PrivateTmp=yes
 NoNewPrivileges=yes
 ProtectSystem=strict

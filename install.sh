@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 
 # Copyright (c) 2025 Vsevolod Tsiliurik
 # SPDX-License-Identifier: AGPL-3.0-or-later
@@ -6,6 +6,8 @@
 # Rclone Systemd Suite Installer
 
 set -e
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 usage() {
 	cat <<-EOF
@@ -15,6 +17,7 @@ usage() {
 		-s, --system              Install system-wide (requires sudo)
 		-n, --dry-run             Show commands without executing
 		-N, --dry-run-show-files  Like --dry-run + show generated file contents
+		--overwrite-env           Overwrite existing conf.env files
 		-h, --help                Show this help
 	EOF
 	exit 0
@@ -23,12 +26,14 @@ usage() {
 DRY_RUN=""
 DRY_RUN_SHOW_FILES=""
 SYSTEM=""
+OVERWRITE_ENV=""
 
 for arg in "$@"; do
 	case "$arg" in
 		-s|--system) SYSTEM=1 ;;
 		-n|--dry-run) DRY_RUN=1 ;;
 		-N|--dry-run-show-files) DRY_RUN=1; DRY_RUN_SHOW_FILES=1 ;;
+		-W|--overwrite-env) OVERWRITE_ENV=1 ;;
 		-h|--help) usage ;;
 	esac
 done
@@ -62,21 +67,23 @@ run() {
 
 if [ "$DRY_RUN" ]; then
 	echo "=== $SCOPE install (dry-run) ==="
+	echo "Script dir: $SCRIPT_DIR"
 	echo "Config dir: $CONF_DIR"
 	echo "Systemd dir: $SYSTEMD_DIR"
 	echo "Desktop dir: $DESKTOP_DIR"
 	echo "systemctl option: ${SYSTEMCTL_OPT:-'(none)'}"
+	echo "Overwrite env: ${OVERWRITE_ENV:-no}"
 	echo ""
 fi
 
 run mkdir -p "$CONF_DIR"/rclone-{bisync,rcd-gui} "$SYSTEMD_DIR" "$DESKTOP_DIR"
-run cp .config/systemd/user/* "$SYSTEMD_DIR/"
+run cp "$SCRIPT_DIR/.config/systemd/user"/* "$SYSTEMD_DIR/"
 
 # Generate .desktop from template
-if [ -f .local/share/applications/rclone-rcd-gui.tpl.desktop ]; then
+if [ -f "$SCRIPT_DIR/.local/share/applications/rclone-rcd-gui.tpl.desktop" ]; then
 	sed -e "s|@CONFIG_PATH@|$RCLONE_RCDGUI_CONFIG|g" \
 			-e "s| @SYSTEMCTL_OPT@|${SYSTEMCTL_OPT:+ $SYSTEMCTL_OPT}|g" \
-			.local/share/applications/rclone-rcd-gui.tpl.desktop > /tmp/rclone-rcd-gui.desktop
+			"$SCRIPT_DIR/.local/share/applications/rclone-rcd-gui.tpl.desktop" > /tmp/rclone-rcd-gui.desktop
 	if [ "$DRY_RUN" ]; then
 		if [ "$DRY_RUN_SHOW_FILES" ]; then
 			echo "[dry-run] Generated .desktop content:"
@@ -90,11 +97,17 @@ if [ -f .local/share/applications/rclone-rcd-gui.tpl.desktop ]; then
 	rm -f /tmp/rclone-rcd-gui.desktop
 fi
 
-[ ! -f "$RCLONE_BISYNC_CONFIG" ] && run cp .config/rclone-bisync/.example.conf.env "$RCLONE_BISYNC_CONFIG"
-[ ! -f "$RCLONE_RCDGUI_CONFIG" ] && run cp .config/rclone-rcd-gui/.example.conf.env "$RCLONE_RCDGUI_CONFIG"
+# Install config files
+if [ "$OVERWRITE_ENV" ] || [ ! -f "$RCLONE_BISYNC_CONFIG" ]; then
+	run cp "$SCRIPT_DIR/.config/rclone-bisync/.example.conf.env" "$RCLONE_BISYNC_CONFIG"
+fi
+
+if [ "$OVERWRITE_ENV" ] || [ ! -f "$RCLONE_RCDGUI_CONFIG" ]; then
+	run cp "$SCRIPT_DIR/.config/rclone-rcd-gui/.example.conf.env" "$RCLONE_RCDGUI_CONFIG"
+fi
+
 run systemctl $SYSTEMCTL_OPT daemon-reload
 
 if [ -z "$DRY_RUN" ]; then
 	echo "$SCOPE install done. Enable: systemctl $SYSTEMCTL_OPT enable --now rclone-bisync@MyRemote.timer"
 fi
-
