@@ -7,14 +7,42 @@ Systemd units for RClone bidirectional sync + RCD Web GUI.
 ```bash
 # User (default)
 ./install.sh
-systemctl --user enable --now rclone-bisync@MyRemote.timer
 
 # System-wide (root, e.g. for config backups)
 sudo ./install.sh --system
+```
+
+## Run
+
+### GUI
+
+```sh
+# There is a .desktop file for that, but you can control it from terminal
+# User (default)
+
+source ~/.config/rclone-rcd-gui/conf.env;
+systemctl --user \
+	is-active --quiet rclone-rcd-gui.service \
+|| systemctl --user \
+	start rclone-rcd-gui.service
+
+# or `enable --now` if you want it to run on startup
+
+# And then open http://${RC_ADDR}:${RC_PORT}, default is http://localhost:5572
+```
+<!-- `# System-wide (root, e.g. for config backups)` -->
+
+### Sync
+
+```bash
+# User (default)
+systemctl --user enable --now rclone-bisync@MyRemote.timer
+
+# System-wide (root, e.g. for config backups)
 sudo systemctl enable --now rclone-bisync@MyRemote.timer
 ```
 
-## Triggers
+#### Triggers
 
 Timer (periodic) + path watcher (on-change) conflict by design - use one:
 

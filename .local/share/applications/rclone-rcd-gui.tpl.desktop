@@ -41,7 +41,19 @@ Keywords[es]=nube;almacenamiento;sincronización;copia de seguridad;
 Keywords[fr]=cloud;stockage;synchronisation;sauvegarde;
 Keywords[pt]=nuvem;armazenamento;sincronização;backup;
 
-Actions=Stop;Restart;EditConfig;OpenLogs;
+Actions=Start;Stop;Restart;EditConfig;OpenLogs;
+
+[Desktop Action Start]
+Name=Start Service
+Name[ru]=Запустить службу
+Name[uk]=Зупинити службу
+Name[sr]=Покрени услугу
+Name[pl]=Rozpocznij usługę
+Name[de]=Dienst startten
+Name[fr]=Démarrer le service
+Name[es]=Iniciar servicio
+Name[pt]=Iniciar serviço
+Exec=bash -c 'source @CONFIG_PATH@; systemctl @SYSTEMCTL_OPT@ is-active --quiet rclone-rcd-gui.service || systemctl @SYSTEMCTL_OPT@ start rclone-rcd-gui.service'
 
 [Desktop Action Stop]
 Name=Stop Service

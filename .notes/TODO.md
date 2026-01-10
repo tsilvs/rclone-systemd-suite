@@ -9,8 +9,8 @@
 > + `CF` - config files
 > + `N(TestCases) = 8`
 
-| Scope  | w/ CF    |           | w/o CF   |           |
-|--------|----------|-----------|----------|-----------|
-| User   | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ |
-| System | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ |
+| Scope  | w/o CF    |          | w/ CF     |          |
+|--------|-----------|----------|-----------|----------|
+| User   | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ |
+| System | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ |
 
