@@ -17,7 +17,7 @@ Type=simple
 Environment=RC_ADDR=127.0.0.1
 Environment=RC_PORT=5572
 # Default credentials, change in config file later
-Environment=RC_FLAGS=--rc-user=admin --rc-pass=admin
+Environment=RC_FLAGS=--rc-user admin --rc-pass admin
 
 # Systemd-managed paths
 Environment=STATE_DIR=%S/%N
@@ -35,6 +35,7 @@ ExecStart=/bin/sh -c "\
 	exec /usr/bin/rclone rcd \
 		--rc-web-gui \
 		--rc-addr=$RC_ADDR:$RC_PORT \
+		--rc-web-gui-no-open-browser \
 		$RC_FLAGS"
 
 # Logging
