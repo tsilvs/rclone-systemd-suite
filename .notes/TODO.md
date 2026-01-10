@@ -14,3 +14,11 @@
 | User   | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ |
 | System | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ |
 
+# TODO
+
+## Immediate
+
++ [ ] Edit `~/.config/rclone-bisync/conf.env`:
+	+ [ ] Fix comments syntax for SystemD parsing
+	+ [ ] Set `SYNC_ROOT`
+
