@@ -56,12 +56,31 @@ systemctl --user enable --now rclone-bisync@MyRemote.path
 
 ## Config
 
-Precedence (later overrides earlier):
-1. Built-in defaults in unit files
-2. System: `/etc/rclone-bisync/.config`, `/etc/rclone-bisync/MyRemote.config`
-3. User: `~/.config/rclone-bisync/.config`, `~/.config/rclone-bisync/MyRemote.config`
+### `rclone-bisync`
 
-Variables: `SYNC_ROOT`, `BISYNC_FLAGS`, `CHECK_FILE`, `LOCAL_PATH`, `CACHE_DIR`
+Precedence:
+
+1. Built-in defaults in unit files
+2. Overrides: `~/.config/systemd/user/rclone-bisync.service.d/YourOverride.conf`
+3. System: `/etc/rclone-bisync/.config`, `/etc/rclone-bisync/MyRemote.config`
+4. User: `~/.config/rclone-bisync/.config`, `~/.config/rclone-bisync/MyRemote.config`
+
+Variables:
+
++ `SYNC_ROOT`
++ `BISYNC_FLAGS`
++ `CHECK_FILE`
++ `LOCAL_PATH`
++ `CACHE_DIR`
+
+### `rclone-rcd-gui`
+
+Precedence:
+
+1. Built-in defaults in unit files
+2. Overrides: `~/.config/systemd/user/rclone-rcd-gui.service.d/MyOverride.conf`
+3. Config - System: `/etc/rclone-rcd-gui/.config`, `/etc/rclone-rcd-gui/MyRemote.config`
+4. Config - User: `~/.config/rclone-rcd-gui/.config`, `~/.config/rclone-rcd-gui/MyRemote.config`
 
 ## Custom Timer
 
@@ -99,3 +118,4 @@ sudo systemctl enable --now rclone-bisync@MyRemote.timer
 ```
 
 Note: System units run as root. Configure `LOCAL_PATH` appropriately.
+

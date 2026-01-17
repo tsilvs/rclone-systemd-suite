@@ -55,7 +55,10 @@ else
 fi
 
 RCLONE_BISYNC_CONFIG="$CONF_DIR/rclone-bisync/conf.env"
+RCLONE_BISYNC_OVERRIDE="$CONF_DIR/rclone-bisync.service.d/example.override.conf"
+
 RCLONE_RCDGUI_CONFIG="$CONF_DIR/rclone-rcd-gui/conf.env"
+RCLONE_RCDGUI_OVERRIDE="$CONF_DIR/rclone-rcd-gui.service.d/example.override.conf"
 
 run() {
 	if [ "$DRY_RUN" ]; then
@@ -102,8 +105,16 @@ if [ "$OVERWRITE_ENV" ] || [ ! -f "$RCLONE_BISYNC_CONFIG" ]; then
 	run cp "$SCRIPT_DIR/.config/rclone-bisync/.example.conf.env" "$RCLONE_BISYNC_CONFIG"
 fi
 
+if [ "$OVERWRITE_ENV" ] || [ ! -f "$RCLONE_BISYNC_OVERRIDE" ]; then
+	run cp "$SCRIPT_DIR/.config/rclone-bisync.service.d/example.override.conf" "$RCLONE_BISYNC_OVERRIDE"
+fi
+
 if [ "$OVERWRITE_ENV" ] || [ ! -f "$RCLONE_RCDGUI_CONFIG" ]; then
 	run cp "$SCRIPT_DIR/.config/rclone-rcd-gui/.example.conf.env" "$RCLONE_RCDGUI_CONFIG"
+fi
+
+if [ "$OVERWRITE_ENV" ] || [ ! -f "$RCLONE_RCDGUI_OVERRIDE" ]; then
+	run cp "$SCRIPT_DIR/.config/rclone-rcd-gui.service.d/example.override.conf" "$RCLONE_RCDGUI_OVERRIDE"
 fi
 
 run systemctl $SYSTEMCTL_OPT daemon-reload

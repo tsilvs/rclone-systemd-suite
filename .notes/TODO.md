@@ -9,6 +9,15 @@
 > + `CF` - config files
 > + `N(TestCases) = 8`
 
+# `rclone-rcd-gui`
+
+| Scope  | w/o CF    |          | w/ CF     |          |
+|--------|-----------|----------|-----------|----------|
+| User   | w/o OR: ✅ | w/ OR: ✅ | w/o OR: ❔ | w/ OR: ❔ |
+| System | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ |
+
+# `rclone-bisync`
+
 | Scope  | w/o CF    |          | w/ CF     |          |
 |--------|-----------|----------|-----------|----------|
 | User   | w/o OR: ❔ | w/ OR: ❔ | w/o OR: ❔ | w/ OR: ❔ |

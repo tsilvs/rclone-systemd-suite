@@ -49,7 +49,8 @@ else
 	DESKTOP_DIR="$HOME/.local/share/applications"
 fi
 
-UNIT_FILES="rclone-bisync@.path rclone-bisync@.service rclone-bisync@.timer rclone-rcd-gui.service"
+UNIT_FILES="rclone-bisync@.{path,service,timer} rclone-rcd-gui.service"
+# UNIT_OVERRIDE_DIRS="{rclone-bisync,rclone-rcd-gui}.service.d"
 
 run() {
 	if [ "$DRY_RUN" ]; then
@@ -81,6 +82,9 @@ done
 for unit in $UNIT_FILES; do
 	[ -f "$SYSTEMD_DIR/$unit" ] && run rm -f "$SYSTEMD_DIR/$unit"
 done
+
+# Remove unit override files
+
 
 # Remove .desktop file
 [ -f "$DESKTOP_DIR/rclone-rcd-gui.desktop" ] && run rm -f "$DESKTOP_DIR/rclone-rcd-gui.desktop"

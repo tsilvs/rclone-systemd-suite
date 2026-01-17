@@ -17,7 +17,8 @@ Type=simple
 Environment=RC_ADDR=127.0.0.1
 Environment=RC_PORT=5572
 # Default credentials, change in config file later
-Environment=RC_FLAGS=--rc-user admin --rc-pass admin
+# Environment="RC_FLAGS=--rc-user=admin --rc-pass=admin" # Can't be used due to multiple unresolved login issues. Please use a reverse proxy with login and redirect if need to expose this service to public web.
+Environment="RC_FLAGS=--rc-no-auth"
 
 # Systemd-managed paths
 Environment=STATE_DIR=%S/%N
