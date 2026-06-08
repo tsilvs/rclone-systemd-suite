@@ -35,8 +35,8 @@ ExecCondition=command -v rclone >/dev/null && \
 
 # Bisync logic: init on first run, then routine sync with conflict handling
 ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
-		echo "bisync-test-$(date +%%s)" > "$LOCAL_PATH/$CHECK_FILE" && \
 		mkdir -p "$LOCAL_PATH" "$CACHE_DIR" && \
+		echo "bisync-test-$(date +%%s)" > "$LOCAL_PATH/$CHECK_FILE" && \
 		rclone copy "$LOCAL_PATH/$CHECK_FILE" "$REMOTE" --create-empty-src-dirs && \
 		rclone bisync "$LOCAL_PATH" "$REMOTE" --resync --create-empty-src-dirs && \
 		touch "$CACHE_DIR/.initialized"; \
@@ -44,13 +44,12 @@ ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
 		rclone bisync "$LOCAL_PATH" "$REMOTE" \
 			--check-access \
 			--check-filename "$CHECK_FILE" \
-			--track-renames \
 			--resilient \
 			--recover \
 			--conflict-resolve newer \
 			--conflict-loser num \
 			--create-empty-src-dirs \
-			${BISYNC_FLAGS:+"$BISYNC_FLAGS"}; \
+			${BISYNC_FLAGS:+$BISYNC_FLAGS}; \
 	fi'
 
 ExecStartPost=logger -t "%N" "Sync completed successfully"

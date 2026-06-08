@@ -12,10 +12,10 @@ Conflicts=%p@%i.timer
 [Path]
 Unit=%p@%i.service
 PathModified=%h/.%p/%i/
-PathChanged=%h/.%p/%i/
 # Debounce: prevents rapid re-triggering from incoming sync changes
+# Burst >1 guards against path unit dying silently on rapid file storms
 TriggerLimitIntervalSec=30
-TriggerLimitBurst=1
+TriggerLimitBurst=3
 
 [Install]
 WantedBy=paths.target

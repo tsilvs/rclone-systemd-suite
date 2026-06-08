@@ -30,8 +30,6 @@ Environment=RUNTIME_DIR=%t/%N
 EnvironmentFile=-%E/%N/conf.env
 EnvironmentFile=-%h/.config/%N/conf.env
 
-# ExecStart=/usr/bin/rclone rcd --rc-web-gui --rc-addr=$RC_ADDR:$RC_PORT $RC_FLAGS
-
 ExecStart=/bin/sh -c "\
 	exec /usr/bin/rclone rcd \
 		--rc-web-gui \
@@ -51,7 +49,7 @@ TimeoutStopSec=10s
 PrivateTmp=yes
 NoNewPrivileges=yes
 ProtectSystem=strict
-ProtectHome=no
+ProtectHome=no  # rclone reads ~/.config/rclone/rclone.conf
 
 [Install]
 WantedBy=default.target

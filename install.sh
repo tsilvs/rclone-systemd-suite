@@ -11,14 +11,14 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 usage() {
 	cat <<-EOF
-	Usage: $(basename "$0") [OPTIONS]
+		Usage: $(basename "$0") [OPTIONS]
 
-	Options:
-		-s, --system              Install system-wide (requires sudo)
-		-n, --dry-run             Show commands without executing
-		-N, --dry-run-show-files  Like --dry-run + show generated file contents
-		--overwrite-env           Overwrite existing conf.env files
-		-h, --help                Show this help
+		Options:
+			-h, --help                Show this help
+			-s, --system              Install system-wide (requires sudo)
+			-n, --dry-run             Show commands without executing
+			-N, --dry-run-show-files  Like --dry-run + show generated file contents
+			-W, --overwrite-env       Overwrite existing conf.env files
 	EOF
 	exit 0
 }
@@ -30,11 +30,14 @@ OVERWRITE_ENV=""
 
 for arg in "$@"; do
 	case "$arg" in
-		-s|--system) SYSTEM=1 ;;
-		-n|--dry-run) DRY_RUN=1 ;;
-		-N|--dry-run-show-files) DRY_RUN=1; DRY_RUN_SHOW_FILES=1 ;;
-		-W|--overwrite-env) OVERWRITE_ENV=1 ;;
-		-h|--help) usage ;;
+	-s | --system) SYSTEM=1 ;;
+	-n | --dry-run) DRY_RUN=1 ;;
+	-N | --dry-run-show-files)
+		DRY_RUN=1
+		DRY_RUN_SHOW_FILES=1
+		;;
+	-W | --overwrite-env) OVERWRITE_ENV=1 ;;
+	-h | --help) usage ;;
 	esac
 done
 
@@ -55,14 +58,16 @@ else
 fi
 
 RCLONE_BISYNC_CONFIG="$CONF_DIR/rclone-bisync/conf.env"
-RCLONE_BISYNC_OVERRIDE="$CONF_DIR/rclone-bisync.service.d/example.override.conf"
+RCLONE_BISYNC_OVERRIDE="$SYSTEMD_DIR/rclone-bisync@.service.d/example.override.conf"
 
 RCLONE_RCDGUI_CONFIG="$CONF_DIR/rclone-rcd-gui/conf.env"
-RCLONE_RCDGUI_OVERRIDE="$CONF_DIR/rclone-rcd-gui.service.d/example.override.conf"
+RCLONE_RCDGUI_OVERRIDE="$SYSTEMD_DIR/rclone-rcd-gui.service.d/example.override.conf"
 
 run() {
 	if [ "$DRY_RUN" ]; then
-		echo "[dry-run] $RUN $*"
+		printf '[dry-run]%s' "${RUN:+ $RUN}"
+		printf ' %q' "$@"
+		echo
 	else
 		$RUN "$@"
 	fi
@@ -79,25 +84,33 @@ if [ "$DRY_RUN" ]; then
 	echo ""
 fi
 
-run mkdir -p "$CONF_DIR"/rclone-{bisync,rcd-gui} "$SYSTEMD_DIR" "$DESKTOP_DIR"
+run mkdir -p "$CONF_DIR"/rclone-{bisync,rcd-gui} \
+	"$SYSTEMD_DIR"/rclone-{bisync@,rcd-gui}.service.d \
+	"$DESKTOP_DIR"
 run cp "$SCRIPT_DIR/.config/systemd/user"/* "$SYSTEMD_DIR/"
 
 # Generate .desktop from template
 if [ -f "$SCRIPT_DIR/.local/share/applications/rclone-rcd-gui.tpl.desktop" ]; then
-	sed -e "s|@CONFIG_PATH@|$RCLONE_RCDGUI_CONFIG|g" \
+	if [ "$DRY_RUN" ] && [ -z "$DRY_RUN_SHOW_FILES" ]; then
+		printf '[dry-run]%s' "${RUN:+ $RUN}"
+		printf ' %q' install -m 644 '<generated>' "$DESKTOP_DIR/rclone-rcd-gui.desktop"
+		echo
+	else
+		sed -e "s|@CONFIG_PATH@|$RCLONE_RCDGUI_CONFIG|g" \
 			-e "s| @SYSTEMCTL_OPT@|${SYSTEMCTL_OPT:+ $SYSTEMCTL_OPT}|g" \
-			"$SCRIPT_DIR/.local/share/applications/rclone-rcd-gui.tpl.desktop" > /tmp/rclone-rcd-gui.desktop
-	if [ "$DRY_RUN" ]; then
-		if [ "$DRY_RUN_SHOW_FILES" ]; then
+			"$SCRIPT_DIR/.local/share/applications/rclone-rcd-gui.tpl.desktop" >/tmp/rclone-rcd-gui.desktop
+		if [ "$DRY_RUN" ]; then
 			echo "[dry-run] Generated .desktop content:"
 			cat /tmp/rclone-rcd-gui.desktop
 			echo ""
+			printf '[dry-run]%s' "${RUN:+ $RUN}"
+			printf ' %q' install -m 644 /tmp/rclone-rcd-gui.desktop "$DESKTOP_DIR/rclone-rcd-gui.desktop"
+			echo
+		else
+			$RUN install -m 644 /tmp/rclone-rcd-gui.desktop "$DESKTOP_DIR/rclone-rcd-gui.desktop"
 		fi
-		echo "[dry-run] $RUN install -m 644 /tmp/rclone-rcd-gui.desktop $DESKTOP_DIR/rclone-rcd-gui.desktop"
-	else
-		$RUN install -m 644 /tmp/rclone-rcd-gui.desktop "$DESKTOP_DIR/rclone-rcd-gui.desktop"
+		rm -f /tmp/rclone-rcd-gui.desktop
 	fi
-	rm -f /tmp/rclone-rcd-gui.desktop
 fi
 
 # Install config files
