@@ -51,6 +51,8 @@ Timer (periodic) + path watcher (on-change) conflict by design - use one:
 systemctl --user enable --now rclone-bisync@MyRemote.timer
 
 # Path-based (on local file changes)
+# NOTE: local sync dir must exist before enabling — systemd won't create it
+mkdir -p ~/.rclone-bisync/MyRemote
 systemctl --user enable --now rclone-bisync@MyRemote.path
 ```
 
@@ -101,7 +103,6 @@ mkdir -p ~/.config/systemd/user/rclone-bisync@MyRemote.path.d
 cat > ~/.config/systemd/user/rclone-bisync@MyRemote.path.d/override.conf <<'EOF'
 [Path]
 PathModified=/custom/path/
-PathChanged=/custom/path/
 EOF
 systemctl --user daemon-reload
 ```

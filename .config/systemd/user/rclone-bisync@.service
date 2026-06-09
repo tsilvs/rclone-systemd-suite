@@ -33,9 +33,11 @@ ExecCondition=command -v rclone >/dev/null && \
 	command -v logger >/dev/null && \
 	rclone lsd "$REMOTE" >/dev/null 2>&1
 
+# Ensure local and cache dirs exist before every run
+ExecStartPre=mkdir -p "$LOCAL_PATH" "$CACHE_DIR"
+
 # Bisync logic: init on first run, then routine sync with conflict handling
 ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
-		mkdir -p "$LOCAL_PATH" "$CACHE_DIR" && \
 		echo "bisync-test-$(date +%%s)" > "$LOCAL_PATH/$CHECK_FILE" && \
 		rclone copy "$LOCAL_PATH/$CHECK_FILE" "$REMOTE" --create-empty-src-dirs && \
 		rclone bisync "$LOCAL_PATH" "$REMOTE" --resync --create-empty-src-dirs && \
