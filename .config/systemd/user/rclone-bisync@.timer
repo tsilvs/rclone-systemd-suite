@@ -7,7 +7,6 @@
 
 [Unit]
 Description=%p timer: Remote "%i"
-Conflicts=%p@%i.path
 
 [Timer]
 OnBootSec=2min

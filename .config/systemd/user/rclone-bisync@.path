@@ -7,7 +7,6 @@
 
 [Unit]
 Description=%p path watcher: remote "%i"
-Conflicts=%p@%i.timer
 
 [Path]
 Unit=%p@%i.service

@@ -14,6 +14,9 @@ Wants=network-online.target
 
 # Built-in defaults
 Environment=CHECK_FILE=RCLONE_TEST
+Environment=RCLONE_CONTIMEOUT=30s
+Environment=RCLONE_TIMEOUT=120s
+Environment=RCLONE_LOW_LEVEL_RETRIES=3
 
 # Systemd-managed paths (%i = instance name, %h = home, %C = cache, %E = /etc or ~/.config)
 Environment=REMOTE=%i:
@@ -27,17 +30,30 @@ EnvironmentFile=-%E/%p/%iconf.env
 EnvironmentFile=-%h/.config/%p/%iconf.env
 
 Type=oneshot
+TimeoutStartSec=3600
 
 # Health check: rclone installed + remote accessible
 ExecCondition=command -v rclone >/dev/null && \
 	command -v logger >/dev/null && \
 	rclone lsd "$REMOTE" >/dev/null 2>&1
 
+# Refuse start if any instance (%i) is already running (clean skip, not failure)
+# Lock is shared across all instances: only 1 sync runs at a time globally
+ExecCondition=/usr/bin/flock --nonblock %t/%p-%i.lock /bin/true
+
 # Ensure local and cache dirs exist before every run
 ExecStartPre=mkdir -p "$LOCAL_PATH" "$CACHE_DIR"
 
+# Clean up partial files left by interrupted transfers (local and remote)
+# Prevents crypt auth failures on next bisync run
+ExecStartPre=/bin/bash -c 'find "$LOCAL_PATH" -name "*.partial" -delete -print | \
+		xargs -r -I{} logger -t "%N" "Removed local partial: {}" ; \
+	rclone delete "$REMOTE" --include "*.partial" --log-level INFO 2>&1 | \
+		logger -t "%N"'
+
 # Bisync logic: init on first run, then routine sync with conflict handling
-ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
+# Holds shared lock for duration, preventing any other instance from starting
+ExecStart=/usr/bin/flock --nonblock %t/%p-%i.lock /bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
 		echo "bisync-test-$(date +%%s)" > "$LOCAL_PATH/$CHECK_FILE" && \
 		rclone copy "$LOCAL_PATH/$CHECK_FILE" "$REMOTE" --create-empty-src-dirs && \
 		rclone bisync "$LOCAL_PATH" "$REMOTE" --resync --create-empty-src-dirs && \
@@ -55,6 +71,12 @@ ExecStart=/bin/bash -ec 'if [ ! -f "$CACHE_DIR/.initialized" ]; then \
 	fi'
 
 ExecStartPost=logger -t "%N" "Sync completed successfully"
+
+# On failure: invalidate initialized marker so next run triggers --resync
+ExecStopPost=/bin/bash -c 'if [ "$SERVICE_RESULT" != "success" ]; then \
+		rm -f "$CACHE_DIR/.initialized" && \
+		logger -t "%N" "Sync failed (exit $EXIT_CODE); cleared .initialized for auto-resync"; \
+	fi'
 
 [Install]
 WantedBy=default.target
